@@ -123,4 +123,22 @@ public class ExtractTest {
         ));
         assertEquals("expected 6 mentions", 6, mentions.size());
     }
+
+    @Test
+    public void testDoubleAtSymbol() {
+        var mentions = Extract.getMentionedUsers(Arrays.asList(
+                simpleTweet(12, "@@mention")
+        ));
+        assertEquals("expected one mention", 1, mentions.size());
+        assertEquals("mention", mentions.iterator().next().toLowerCase());
+    }
+
+    @Test
+    public void testMentionAfterEmail() {
+        var mentions = Extract.getMentionedUsers(Arrays.asList(
+                simpleTweet(13, "name@domain.@mention.com")
+        ));
+        assertEquals("expected one mention", 1, mentions.size());
+        assertEquals("mention", mentions.iterator().next().toLowerCase());
+    }
 }
