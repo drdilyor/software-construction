@@ -31,7 +31,7 @@ public class Filter {
      *         in the same order as in the input list.
      */
     public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
-         return tweets.stream().filter(tweet -> tweet.getAuthor().toLowerCase().equals(username)).toList();
+         return tweets.stream().filter(tweet -> tweet.getAuthor().toLowerCase().equals(username.toLowerCase())).toList();
     }
 
     /**
@@ -46,8 +46,8 @@ public class Filter {
      */
     public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
         return tweets.stream().filter(tweet ->
-                tweet.getTimestamp().isAfter(timespan.getStart()) &&
-                tweet.getTimestamp().isBefore(timespan.getEnd())).toList();
+                !tweet.getTimestamp().isBefore(timespan.getStart()) &&
+                !tweet.getTimestamp().isAfter(timespan.getEnd())).toList();
     }
 
     /**
