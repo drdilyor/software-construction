@@ -6,6 +6,7 @@ package twitter;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -73,4 +74,74 @@ public class FilterTest {
      * in this test class.
      */
 
+    private boolean tweetEquals(Tweet t1, Tweet t2) {
+        return t1.getId() == t2.getId()
+                && t1.getAuthor().equals(t2.getAuthor())
+                && t1.getText().equals(t2.getText())
+                && t1.getTimestamp().equals(t2.getTimestamp());
+    }
+
+    @Test
+    public void testWrittenByCaseInsensitive() {
+        var tweets = Arrays.asList(
+                new Tweet(12, "bob", "content", d1),
+                new Tweet(13, "BoB", "more content", d2)
+        );
+        var filteredTweets = Filter.writtenBy(new ArrayList<>(tweets), "bOb");
+        assertEquals(tweets, filteredTweets);
+    }
+
+    @Test
+    public void testWrittenByIsPure() {
+        var tweets = Arrays.asList(
+                new Tweet(1, "alice", "content", d1),
+                new Tweet(2, "bob", "content", d2),
+                new Tweet(3, "BOB", "content", d2)
+        );
+        var tweetsClone = new ArrayList<>(tweets);
+        Filter.writtenBy(tweetsClone, "bob");
+
+        assertEquals("expected to not mutate input", tweets, tweetsClone);
+    }
+
+    @Test
+    public void testInTimespanEmptyInput() {
+        var filtered = Filter.inTimespan(new ArrayList<Tweet>(), new Timespan(d1, d2));
+        assertTrue(filtered.isEmpty());
+    }
+
+    @Test
+    public void testInTimespanEmptyOutput() {
+        var filtered = Filter.inTimespan(Arrays.asList(
+                new Tweet(1, "author", "content", d1),
+                new Tweet(2, "author", "content", d1)
+        ), new Timespan(d2, d2));
+        assertTrue(filtered.isEmpty());
+    }
+
+    @Test
+    public void testInTimespanSingleTimePoint() {
+        var filtered = Filter.inTimespan(Arrays.asList(
+                new Tweet(1, "author", "tweet 1", d1),
+                new Tweet(2, "author", "tweet 2", d1),
+                new Tweet(3, "author", "tweet 3", d2)
+        ), new Timespan(d1, d1));
+
+        assertEquals("expected to find 2 tweets", 2, filtered.size());
+        assertEquals(filtered.get(0).getId(), 1);
+        assertEquals(filtered.get(1).getId(), 2);
+    }
+
+    @Test
+    public void testInTimespanIsPure() {
+        var tweets = Arrays.asList(
+                new Tweet(1, "author", "tweet 1", d1),
+                new Tweet(2, "author", "tweet 2", d1),
+                new Tweet(3, "author", "tweet 3", d2)
+        );
+        var tweetsClone = new ArrayList<>(tweets);
+        Filter.inTimespan(tweetsClone, new Timespan(d1, d1));
+
+        assertEquals("expected to not mutate input", tweets, tweetsClone);
+    }
 }
